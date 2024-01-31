@@ -3,6 +3,9 @@
     "name": "Cookie Manager",
     "version": "1.0",
     "description": "Simple cookie manager Chrome extension",
+    "background": {
+      "service_worker": "background.js"
+    },
     "action": {
       "default_icon": {
         "16": "icon.png",
@@ -11,10 +14,19 @@
       },
       "default_popup": "./popup/popup.html"
     },
-    "permissions": ["cookies"],
+    "icons": {
+      "16": "icon.png",
+      "48":"icon.png",
+      "128": "icon.png"
+    },
+    "permissions": ["cookies","storage","webNavigation"],
     "host_permissions": ["<all_urls>"],
-    "background": {
-      "service_worker": "background.js"
-    }
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "all_frams": true
+      }
+    ]
   }
   

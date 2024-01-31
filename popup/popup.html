@@ -10,23 +10,119 @@
     />
   </head>
   <body>
-    <header class="d-flex">
-      <span>
-        <img src="../icon.png" alt="icon" width="25px" height="25px">
-      </span>
-      <h2 style="margin-left: 5px;">Cookie Manager</h2>
-    </header>
-    <nav class="navbar bg-body-tertiary fs-6">
-      <div class="container-fluid" id="NavUrl">
-        
+    <div id="userConsent" class="mx-2">
+      <div class="userConsent_Header d-flex justify-content-between">
+        <h1>Want to use safe browsing?</h1>
+        <span class="cross-icon menu__close" id="privacyCross"><b>X</b></span>
       </div>
-    </nav>
 
-    <div class="accordion accordion-flush" id="accordionFlushExample"></div>
+      <div class="userConsent_Content">
+        <p>
+          To enable us to provide you with our safe browsing, we need to access
+          and collect certain information, such as: click stream data, and IP
+          address.
+        </p>
 
-    <ul id="cookieList"></ul>
-    <script src="../bootstrap/js/bootstrap.bundle.js"></script>
-    <script src="./popup.js"></script>
+        <p>
+          In addition, subject to your consent through the prominent notice, we
+          will be accessing and collecting your web browsing data that includes
+          information on: clickstream data
+        </p>
+
+        <p>
+          We share this web browsing data in an aggregated, anonymized format to
+          improve our services.
+        </p>
+
+        <p>
+          We wish to make it clear, we do not want to know your identity,
+          preferences or any information about you personally, all as detailed
+          in the
+          <a id="privacyLink" class="menu__link link" href="https://google.com/"
+            >privacy policy</a
+          >.
+        </p>
+        <br /><br />
+      </div>
+
+      <div class="userConsent_Buttons">
+        <button id="userConsent_allowButton">Agree & Continue</button>
+        <button id="userConsent_rejectButton">Decline</button>
+      </div>
+
+      <div class="accordion" id="analyticsToggle">
+        <b>Google Analytics</b>
+        <div class="panel" style="position: relative; left: 10px; bottom: 3px">
+          <form class="setting" id="analyticsForm">
+            <input
+              type="checkbox"
+              id="analyticsBtn"
+              name="analyticsBtn"
+              class="switch-input"
+            />
+            <label for="analyticsBtn" class="switch-label"></label>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="main mx-2">
+      <header class="d-flex" style="width: 100%">
+        <span>
+          <img src="../icon.png" alt="icon" width="25px" height="25px" />
+        </span>
+        <h2 style="margin-left: 5px; margin-top: -2px; width: 200px">
+          Cookie Manager
+        </h2>
+        <input
+          type="text"
+          id="SearchBar"
+          placeholder="Search Cookie"
+          style="width: 180px; height: 30px; text-align: center"
+        />
+        <span>
+          <img
+            src="./menu.jpg"
+            id="menuIcon"
+            alt="icon"
+            width="30px"
+            height="30px"
+          />
+        </span>
+      </header>
+      <nav
+        class="navbar bg-body-tertiary fs-6"
+        id="NavUrl"
+        style="border-radius: 8px"
+      ></nav>
+
+      <div class="addButton d-flex my-2 justify-content-between">
+        <button type="button" id="addCookieBtn" class="btn btn-success btn-sm">
+          Add
+        </button>
+        <button type="button" id="BlockedBtn" class="btn btn-warning btn-sm">
+          Blocked
+        </button>
+        <button type="button" id="DeleteAllBtn" class="btn btn-danger btn-sm">
+          Delete
+        </button>
+        <!-- <button type="button" id="settingBtn" class="btn btn-info btn-sm">Settings</button> -->
+      </div>
+
+      <div class="cookeiAccordian">
+        <div class="accordion accordion-flush" id="accordionFlushExample"></div>
+      </div>
+      <div class="addCookieForm" id="addCookieForm">
+        <div class="accordion accordion-flush" id="accordionFlushExample"></div>
+      </div>
+      <div class="blockedCookieForm" id="blockedCookieForm">
+        <div class="accordion accordion-flush" id="accordionFlushExample"></div>
+      </div>
+
+      <ul id="cookieList"></ul>
+
+      <script src="../bootstrap/js/bootstrap.bundle.js"></script>
+      <script src="./popup.js"></script>
+    </div>
   </body>
 </html>
 
