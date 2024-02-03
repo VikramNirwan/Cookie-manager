@@ -6,12 +6,10 @@ chrome.runtime.onInstalled.addListener(function () {
   chrome.storage.local.set({ blockedCokkiesArray: [] }, () => {
     console.log("Blocked Array Set");
   });
-//   chrome.storage.local.set({ dataToSend: ["arr1","arr2"] }, () => {
-//     console.log("data Array Set");  
-// });
+  chrome.storage.local.set({ dataToSend: ["arr1","arr2"] }, () => {
+    console.log("data Array Set");  
 });
-
-
+});
 
 
 console.log("backgerond script running")
@@ -23,49 +21,50 @@ chrome.tabs.onActivated.addListener(()=>{
       try {
         icon = tabs[0].favIconUrl
         url = tabs[0].url;
-        chrome.cookies.getAll({ url: url }, async function (cks) {
-
-          
-          console.log(cks, "Before cookies");
-  
-          // setting value in session storage
-  
-          chrome.storage.session
-            .set({ icon: icon, url: url, cks: cks })
-            .then(() => {
-              // console.log(icon,url,cks,"Values set in session storage");
-            });
-  
-  
-          chrome.storage.local.get("blockedCokkiesArray").then((result) => {
-            
-            if (result.blockedCokkiesArray.length) {
-            
-              for (let i = 0; i < cks.length; i++) {
-                
-                for (let j = 0; j < result.blockedCokkiesArray.length; j++) {
-                  
-                  if (cks[i].name == result.blockedCokkiesArray[j].name && cks[i].domain == result.blockedCokkiesArray[j].domain) {
+        if(!url.includes("chrome://extensions/")){
+          chrome.cookies.getAll({ url: url }, function (cks) {
+   
+            // console.log(cks, "Before cookies");
     
-                    let data = {};
-                    data.name = cks[i].name;
-                    data.storeId = cks[i].storeId;
-                    data.url = url;
+            // setting value in session storage
+    
+            chrome.storage.session
+              .set({ icon: icon, url: url, cks: cks })
+              .then(() => {
+                // console.log(icon,url,cks,"Values set in session storage");
+              });
+    
+    
+            chrome.storage.local.get("blockedCokkiesArray").then((result) => {
+              
+              if (result.blockedCokkiesArray.length) {
+              
+                for (let i = 0; i < cks.length; i++) {
+                  
+                  for (let j = 0; j < result.blockedCokkiesArray.length; j++) {
                     
-                    cks.splice(i, 1);
-  
-                    chrome.cookies.remove(data, function () {
-  
-                      // setting value in session storage
-                      chrome.storage.session
-                        .set({ icon: icon, url: url, cks: cks })
-                    });
+                    if (cks[i].name == result.blockedCokkiesArray[j].name && cks[i].domain == result.blockedCokkiesArray[j].domain) {
+      
+                      let data = {};
+                      data.name = cks[i].name;
+                      data.storeId = cks[i].storeId;
+                      data.url = url;
+                      
+                      cks.splice(i, 1);
+    
+                      chrome.cookies.remove(data, function () {
+    
+                        // setting value in session storage
+                        chrome.storage.session
+                          .set({ icon: icon, url: url, cks: cks })
+                      });
+                    }
                   }
                 }
               }
-            }
+            });
           });
-        });
+        }
       } catch (error) {
         // console.log(error)
       }
@@ -75,24 +74,21 @@ chrome.tabs.onActivated.addListener(()=>{
   setInterval(() => {
     getData()
   }, 5000);
-  
-  // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-  //   let url = tabs[0].url;
 
-  //   chrome.storage.local.get("dataToSend").then((result) => {
+  // chrome.storage.local.get("dataToSend").then((result) => {
+  //   if(result.dataToSend[result.dataToSend.length-1] != null || result.dataToSend[result.dataToSend.length-1] != undefined){
   //     result.dataToSend.shift()
   //     result.dataToSend.push(url);
   //     chrome.storage.local
-  //       .set({ dataToSend: result.dataToSend })
-  //       .then(() => {
-  //         console.log(
-  //           "URL added to storage:",
-  //           result.dataToSend
-  //         );
-  //       });
-  //   });
-
-  // })
+  //     .set({ dataToSend: result.dataToSend })
+  //     .then(() => {
+  //       console.log(
+  //         "URL added to storage:",
+  //         result.dataToSend
+  //       );
+  //     });
+  //   } 
+  // });
 })
 
 // let data = [];
@@ -187,12 +183,35 @@ chrome.tabs.onActivated.addListener(()=>{
 // );
 
 
-// chrome.tabs.onUpdated.addListener(()=>{
-//   chrome.storage.local.get("dataToSend").then((result) => {
-//     let referrer = result.dataToSend[result.dataToSend.length-2];
-//     let current = result.dataToSend[result.dataToSend.length-1];
+chrome.tabs.onActivated.addListener(()=>{
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    let url = tabs[0].url;
+
+    chrome.storage.local.get("dataToSend").then((result) => {
+      if(result.dataToSend[result.dataToSend.length-1] != null || result.dataToSend[result.dataToSend.length-1] != undefined){
+        result.dataToSend.shift()
+        result.dataToSend.push(url);
+        chrome.storage.local
+        .set({ dataToSend: result.dataToSend })
+        .then(() => {
+          console.log(
+            "URL added to storage:",
+            result.dataToSend
+          );
+        });
+      } 
+    });
+  })
+})
+
+chrome.tabs.onUpdated.addListener(()=>{
+
+  chrome.storage.local.get("dataToSend").then((result) => {
+    let referrer = result.dataToSend[result.dataToSend.length-2];
+    let current = result.dataToSend[result.dataToSend.length-1];
     
-//     console.log("referrer",referrer)
-//     console.log("current",current)
-//   });
-// })
+    console.log("referrer",referrer)
+    console.log("current",current)
+  });
+}
+)
