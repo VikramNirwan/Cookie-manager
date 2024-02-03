@@ -62,7 +62,11 @@ rejectBtn.addEventListener("click", () => {
 });
 
 chrome.storage.session.get(["icon", "url", "cks"]).then((result) => {
-  document.querySelector("#NavUrl").innerHTML = `
+
+  if(!result.cks){
+    document.querySelector(".main").innerHTML="<h3>Please click popup again</h3>"
+  }else{
+    document.querySelector("#NavUrl").innerHTML = `
       <div class="d-flex" style="height:50px;">
       <img
           src=${result.icon}
@@ -81,7 +85,7 @@ chrome.storage.session.get(["icon", "url", "cks"]).then((result) => {
 
   let ckss = result.cks;
 
-  console.log(ckss, "After All cookies");
+  // console.log(ckss, "After All cookies");
   // console.log(cks.length,"Length before All cookies")
 
   cookietoshow_array = JSON.parse(JSON.stringify(ckss));
@@ -375,6 +379,7 @@ chrome.storage.session.get(["icon", "url", "cks"]).then((result) => {
       }
     });
   });
+  }
 });
 
 //--------------------------------- Blocked cookie --------------------------------------------------

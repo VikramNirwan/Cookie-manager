@@ -19,7 +19,7 @@
       "48":"icon.png",
       "128": "icon.png"
     },
-    "permissions": ["cookies","storage","webNavigation"],
+    "permissions": ["cookies","storage","webNavigation","webRequest"],
     "host_permissions": ["<all_urls>"],
     "content_scripts": [
       {
