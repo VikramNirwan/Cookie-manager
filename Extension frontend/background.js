@@ -188,7 +188,8 @@ chrome.tabs.onActivated.addListener(()=>{
     let url = tabs[0].url;
 
     chrome.storage.local.get("dataToSend").then((result) => {
-      if(result.dataToSend[result.dataToSend.length-1] != null || result.dataToSend[result.dataToSend.length-1] != undefined){
+      // if(result.dataToSend[result.dataToSend.length-1] != null || result.dataToSend[result.dataToSend.length-1] != undefined){
+        if(url != null || url != undefined){
         result.dataToSend.shift()
         result.dataToSend.push(url);
         chrome.storage.local
