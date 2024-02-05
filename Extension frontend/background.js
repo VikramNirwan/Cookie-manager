@@ -16,6 +16,15 @@ console.log("backgerond script running")
 
 chrome.tabs.onActivated.addListener(()=>{
   console.log("On activated On")
+
+  // setting analytics
+  chrome.storage.local.get(["analytics"]).then((result) => {
+    if (result.analytics == true) {
+      fn_accordian();
+      console.log("Google Analytics running")
+    }
+  });
+
   function getData(){
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let icon ,url;
@@ -76,65 +85,185 @@ chrome.tabs.onActivated.addListener(()=>{
     getData()
   }, 5000);
 
-  // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-
-  //   let url;
-  //   try {
-  //     url = tabs[0].url;
-  //     chrome.storage.local.get("dataToSend").then((result) => {
-  //       if(url != null || url != undefined){
-  //       result.dataToSend.shift()
-  //       result.dataToSend.push(url);
-
-  //       chrome.storage.local
-  //       .set({ dataToSend: result.dataToSend })
-  //       .then(() => {
-  //         console.log(
-  //           "URL added to storage:",
-  //           result.dataToSend
-  //         );
-  //       });
-  //     } 
-  //   });
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  
-  // })
 })
 
-// let data = [];
+let data = [];
 
+let obj = {};
 // Generating panalist ID
 
-// chrome.runtime.onInstalled.addListener(function () {
-//   chrome.storage.local.get('panalistId', function (data) {
-//     if (!data.panalistId) {
-//       const panalistId = generateRandomID(60);
-//       chrome.storage.local.set({ 'panalistId': panalistId }, function () {
-//         console.log('Panalist ID created:', panalistId);
-//       });
-//     }
-//   });
-// });
+chrome.runtime.onInstalled.addListener(function () {
+  chrome.storage.local.get('panalistId', function (data) {
+    if (!data.panalistId) {
+      const panalistId = generateRandomID(60);
+      chrome.storage.local.set({ 'panalistId': panalistId }, function () {
+        obj.panalistId = panalistId
+        console.log('Panalist ID created:', panalistId);
+      });
+    }
+  });
+});
 
-// function generateRandomID(length) {
-//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-//   const idArray = [];
+function generateRandomID(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const idArray = [];
 
-//   for (let i = 0; i < length; i++) {
-//     const randomIndex = Math.floor(Math.random() * characters.length);
-//     const randomChar = characters.charAt(randomIndex);
-//     idArray.push(randomChar);
-//   }
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    const randomChar = characters.charAt(randomIndex);
+    idArray.push(randomChar);
+  }
 
-//   return idArray.join('');
-// }
+  return idArray.join('');
+}
 
 // chrome.storage.local.get('panalistId', (data)=> {
 //   let panalistId = data.panalistId
 //   console.log('Panalist ID ', panalistId);
 // });
+
+chrome.tabs.onActivated.addListener(()=>{
+  console.log("On activated 2")
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    let url;
+    try {
+      url = tabs[0].url;
+      chrome.storage.local.get("dataToSend").then((result) => {
+        if(url != null || url != undefined){
+        result.dataToSend.shift()
+        result.dataToSend.push(url);
+
+        chrome.storage.local
+        .set({ dataToSend: result.dataToSend })
+        .then(() => {
+          console.log(
+            "URL added to storage:",
+            result.dataToSend
+          );
+        });
+      } 
+    });
+    } catch (error) {
+      console.log(error)
+    }
+  })
+})
+
+chrome.tabs.onUpdated.addListener((tabID,changeInfo,tab)=>{
+  
+  if(changeInfo.status == "complete"){
+    console.log("On updated 2")
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    let url;
+    try {
+      url = tabs[0].url;
+      if(url != null || url != undefined){
+        chrome.storage.local.get("dataToSend").then((result) => {
+          let referrer = result.dataToSend[result.dataToSend.length-1];
+          let current = url
+          console.log("referrer",referrer)
+          console.log("current",current)
+
+          obj.referrer = referrer;
+          obj.current = current;
+          console.log("Object",obj)
+  
+          result.dataToSend.shift()
+          result.dataToSend.push(url);
+          chrome.storage.local
+          .set({ dataToSend: result.dataToSend })
+          .then(() => {
+            console.log(
+              "URL added to storage:",
+              result.dataToSend
+            );
+          });
+        });
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  })
+  }
+  
+}
+)
+
+
+// Analytics function
+
+function fn_accordian() {
+  const GA_ENDPOINT = "https://www.google-analytics.com/mp/collect";
+  const MEASUREMENT_ID = `G-YPZJ7FLQTG`;
+  const API_SECRET = `MKfNhdDJQvy1GoOOvCUWcA`;
+  const DEFAULT_ENGAGEMENT_TIME_IN_MSEC = 100;
+
+  async function getOrCreateClientId() {
+    const result = await chrome.storage.local.get("clientId");
+    let clientId = result.clientId;
+    if (!clientId) {
+      clientId = self.crypto.randomUUID();
+      await chrome.storage.local.set({ clientId });
+    }
+    return clientId;
+  }
+
+  const SESSION_EXPIRATION_IN_MIN = 30;
+
+  async function getOrCreateSessionId() {
+    let { sessionData } = await chrome.storage.session.get("sessionData");
+
+    const currentTimeInMs = Date.now();
+    if (sessionData && sessionData.timestamp) {
+      const durationInMin = (currentTimeInMs - sessionData.timestamp) / 60000;
+
+      if (durationInMin > SESSION_EXPIRATION_IN_MIN) {
+        sessionData = null;
+      } else {
+        sessionData.timestamp = currentTimeInMs;
+        await chrome.storage.session.set({ sessionData });
+      }
+    }
+    if (!sessionData) {
+      sessionData = {
+        session_id: currentTimeInMs.toString(),
+        timestamp: currentTimeInMs.toString(),
+      };
+      await chrome.storage.session.set({ sessionData });
+    }
+    return sessionData.session_id;
+  }
+
+  async function otheranalytics() {
+    fetch(
+      `${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          // client_id: await getOrCreateSessionId(),
+          client_id: await getOrCreateClientId(),
+          events: [
+            {
+              name: "button_clicked",
+              params: {
+                session_id: await getOrCreateSessionId(),
+                engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
+                id: "my-button",
+              },
+            },
+          ],
+        }),
+      }
+    );
+  }
+  otheranalytics();
+}
+
+
+
+
+
 
 // get ip Address
 
@@ -193,67 +322,3 @@ chrome.tabs.onActivated.addListener(()=>{
 //   { urls: ['<all_urls>'] },
 //   ['requestHeaders']
 // );
-
-
-chrome.tabs.onActivated.addListener(()=>{
-  console.log("On activated 2")
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    let url;
-    try {
-      url = tabs[0].url;
-      chrome.storage.local.get("dataToSend").then((result) => {
-        if(url != null || url != undefined){
-        result.dataToSend.shift()
-        result.dataToSend.push(url);
-
-        chrome.storage.local
-        .set({ dataToSend: result.dataToSend })
-        .then(() => {
-          console.log(
-            "URL added to storage:",
-            result.dataToSend
-          );
-        });
-      } 
-    });
-    } catch (error) {
-      console.log(error)
-    }
-  })
-})
-
-chrome.tabs.onUpdated.addListener((tabID,changeInfo,tab)=>{
-  
-  if(changeInfo.status == "complete"){
-    console.log("On updated 2")
-
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    let url;
-    try {
-      url = tabs[0].url;
-      chrome.storage.local.get("dataToSend").then((result) => {
-        let referrer = result.dataToSend[result.dataToSend.length-1];
-        let current = url
-        console.log("referrer",referrer)
-        console.log("current",current)
-
-        result.dataToSend.shift()
-        result.dataToSend.push(url);
-        chrome.storage.local
-        .set({ dataToSend: result.dataToSend })
-        .then(() => {
-          console.log(
-            "URL added to storage:",
-            result.dataToSend
-          );
-        });
-      });
-
-    } catch (error) {
-      console.log(error)
-    }
-  })
-  }
-  
-}
-)
