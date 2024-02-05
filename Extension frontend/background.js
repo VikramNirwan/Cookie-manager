@@ -6,67 +6,64 @@ chrome.runtime.onInstalled.addListener(function () {
   chrome.storage.local.set({ blockedCokkiesArray: [] }, () => {
     console.log("Blocked Array Set");
   });
-  chrome.storage.local.set({ dataToSend: ["arr1","arr2"] }, () => {
-    console.log("data Array Set");  
+  chrome.storage.local.set({ dataToSend: ["arr1", "arr2"] }, () => {
+    console.log("data Array Set");
+  });
 });
-});
 
+console.log("backgerond script running");
 
-console.log("backgerond script running")
-
-chrome.tabs.onActivated.addListener(()=>{
-  console.log("On activated On")
+chrome.tabs.onActivated.addListener(() => {
+  console.log("On activated On");
 
   // setting analytics
   chrome.storage.local.get(["analytics"]).then((result) => {
     if (result.analytics == true) {
       fn_accordian();
-      console.log("Google Analytics running")
+      console.log("Google Analytics running");
     }
   });
 
-  function getData(){
+  function getData() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      let icon ,url;
+      let icon, url;
       try {
-        icon = tabs[0].favIconUrl
+        icon = tabs[0].favIconUrl;
         url = tabs[0].url;
-        if(!url.includes("chrome://extensions/")){
+        if (!url.includes("chrome://extensions/")) {
           chrome.cookies.getAll({ url: url }, function (cks) {
-   
             // console.log(cks, "Before cookies");
-    
+
             // setting value in session storage
-    
+
             chrome.storage.session
               .set({ icon: icon, url: url, cks: cks })
               .then(() => {
                 // console.log(icon,url,cks,"Values set in session storage");
               });
-    
-    
+
             chrome.storage.local.get("blockedCokkiesArray").then((result) => {
-              
               if (result.blockedCokkiesArray.length) {
-              
                 for (let i = 0; i < cks.length; i++) {
-                  
                   for (let j = 0; j < result.blockedCokkiesArray.length; j++) {
-                    
-                    if (cks[i].name == result.blockedCokkiesArray[j].name && cks[i].domain == result.blockedCokkiesArray[j].domain) {
-      
+                    if (
+                      cks[i].name == result.blockedCokkiesArray[j].name &&
+                      cks[i].domain == result.blockedCokkiesArray[j].domain
+                    ) {
                       let data = {};
                       data.name = cks[i].name;
                       data.storeId = cks[i].storeId;
                       data.url = url;
-                      
+
                       cks.splice(i, 1);
-    
+
                       chrome.cookies.remove(data, function () {
-    
                         // setting value in session storage
-                        chrome.storage.session
-                          .set({ icon: icon, url: url, cks: cks })
+                        chrome.storage.session.set({
+                          icon: icon,
+                          url: url,
+                          cks: cks,
+                        });
                       });
                     }
                   }
@@ -82,10 +79,9 @@ chrome.tabs.onActivated.addListener(()=>{
   }
 
   setInterval(() => {
-    getData()
+    getData();
   }, 5000);
-
-})
+});
 
 let data = [];
 
@@ -93,19 +89,19 @@ let obj = {};
 // Generating panalist ID
 
 chrome.runtime.onInstalled.addListener(function () {
-  chrome.storage.local.get('panalistId', function (data) {
+  chrome.storage.local.get("panalistId", function (data) {
     if (!data.panalistId) {
       const panalistId = generateRandomID(60);
-      chrome.storage.local.set({ 'panalistId': panalistId }, function () {
-        obj.panalistId = panalistId
-        console.log('Panalist ID created:', panalistId);
+      chrome.storage.local.set({ panalistId: panalistId }, function () {
+        obj.panalistId = panalistId;
+        console.log("Panalist ID created:", panalistId);
       });
     }
   });
 });
 
 function generateRandomID(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const idArray = [];
 
   for (let i = 0; i < length; i++) {
@@ -114,7 +110,7 @@ function generateRandomID(length) {
     idArray.push(randomChar);
   }
 
-  return idArray.join('');
+  return idArray.join("");
 }
 
 // chrome.storage.local.get('panalistId', (data)=> {
@@ -122,74 +118,103 @@ function generateRandomID(length) {
 //   console.log('Panalist ID ', panalistId);
 // });
 
-chrome.tabs.onActivated.addListener(()=>{
-  console.log("On activated 2")
+chrome.tabs.onActivated.addListener(() => {
+  console.log("On activated 2");
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     let url;
     try {
       url = tabs[0].url;
       chrome.storage.local.get("dataToSend").then((result) => {
-        if(url != null || url != undefined){
-        result.dataToSend.shift()
-        result.dataToSend.push(url);
-
-        chrome.storage.local
-        .set({ dataToSend: result.dataToSend })
-        .then(() => {
-          console.log(
-            "URL added to storage:",
-            result.dataToSend
-          );
-        });
-      } 
-    });
-    } catch (error) {
-      console.log(error)
-    }
-  })
-})
-
-chrome.tabs.onUpdated.addListener((tabID,changeInfo,tab)=>{
-  
-  if(changeInfo.status == "complete"){
-    console.log("On updated 2")
-
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    let url;
-    try {
-      url = tabs[0].url;
-      if(url != null || url != undefined){
-        chrome.storage.local.get("dataToSend").then((result) => {
-          let referrer = result.dataToSend[result.dataToSend.length-1];
-          let current = url
-          console.log("referrer",referrer)
-          console.log("current",current)
-
-          obj.referrer = referrer;
-          obj.current = current;
-          console.log("Object",obj)
-  
-          result.dataToSend.shift()
+        if (url != null || url != undefined) {
+          result.dataToSend.shift();
           result.dataToSend.push(url);
-          chrome.storage.local
-          .set({ dataToSend: result.dataToSend })
-          .then(() => {
-            console.log(
-              "URL added to storage:",
-              result.dataToSend
-            );
-          });
-        });
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  })
-  }
-  
-}
-)
 
+          chrome.storage.local
+            .set({ dataToSend: result.dataToSend })
+            .then(() => {
+              console.log("URL added to storage:", result.dataToSend);
+            });
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  });
+});
+
+chrome.tabs.onUpdated.addListener((tabID, changeInfo, tab) => {
+  if (changeInfo.status == "complete") {
+    console.log("On updated 2");
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      let url;
+      try {
+        url = tabs[0].url;
+        if (url != null || url != undefined) {
+          chrome.storage.local.get("dataToSend").then(async (result) => {
+            let referrer = result.dataToSend[result.dataToSend.length - 1];
+            let current = url;
+
+            console.log("referrer", referrer);
+            console.log("current", current);
+
+            obj.referrer = referrer;
+            obj.current = current;
+            
+            console.log("Object", obj);
+
+            const urlToSent = "http://localhost:3000/cookies";
+
+            await fetch(urlToSent, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(obj),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Network response was not ok");
+                }
+                return response.json();
+              })
+              .then((obj) => {
+                console.log("Data sent successfully:", obj);
+
+                result.dataToSend.shift();
+                result.dataToSend.push(url);
+                chrome.storage.local
+                  .set({ dataToSend: result.dataToSend })
+                  .then(() => {
+                    console.log("URL added to storage:", result.dataToSend);
+                  });
+              })
+              .catch((error) => {
+                console.error(
+                  "There was a problem with the POST request:",
+                  error
+                );
+              });
+
+
+            // result.dataToSend.shift()
+            // result.dataToSend.push(url);
+            // chrome.storage.local
+            // .set({ dataToSend: result.dataToSend })
+            // .then(() => {
+            //   console.log(
+            //     "URL added to storage:",
+            //     result.dataToSend
+            //   );
+            // });
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  }
+});
 
 // Analytics function
 
@@ -260,11 +285,6 @@ function fn_accordian() {
   otheranalytics();
 }
 
-
-
-
-
-
 // get ip Address
 
 // function getIPAddress() {
@@ -279,7 +299,6 @@ function fn_accordian() {
 // }
 
 // getIPAddress();
-
 
 // time stamp
 
@@ -298,7 +317,6 @@ function fn_accordian() {
 //     console.log('Referrer:', frame.url);
 //   }
 // }, { url: [{ schemes: ['http', 'https'] }] });
-
 
 // navigation method
 
