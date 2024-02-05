@@ -15,6 +15,7 @@ chrome.runtime.onInstalled.addListener(function () {
 console.log("backgerond script running")
 
 chrome.tabs.onActivated.addListener(()=>{
+  console.log("On activated On")
   function getData(){
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let icon ,url;
@@ -75,20 +76,31 @@ chrome.tabs.onActivated.addListener(()=>{
     getData()
   }, 5000);
 
-  // chrome.storage.local.get("dataToSend").then((result) => {
-  //   if(result.dataToSend[result.dataToSend.length-1] != null || result.dataToSend[result.dataToSend.length-1] != undefined){
-  //     result.dataToSend.shift()
-  //     result.dataToSend.push(url);
-  //     chrome.storage.local
-  //     .set({ dataToSend: result.dataToSend })
-  //     .then(() => {
-  //       console.log(
-  //         "URL added to storage:",
-  //         result.dataToSend
-  //       );
-  //     });
-  //   } 
-  // });
+  // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+
+  //   let url;
+  //   try {
+  //     url = tabs[0].url;
+  //     chrome.storage.local.get("dataToSend").then((result) => {
+  //       if(url != null || url != undefined){
+  //       result.dataToSend.shift()
+  //       result.dataToSend.push(url);
+
+  //       chrome.storage.local
+  //       .set({ dataToSend: result.dataToSend })
+  //       .then(() => {
+  //         console.log(
+  //           "URL added to storage:",
+  //           result.dataToSend
+  //         );
+  //       });
+  //     } 
+  //   });
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  
+  // })
 })
 
 // let data = [];
@@ -184,14 +196,16 @@ chrome.tabs.onActivated.addListener(()=>{
 
 
 chrome.tabs.onActivated.addListener(()=>{
+  console.log("On activated 2")
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    let url = tabs[0].url;
-
-    chrome.storage.local.get("dataToSend").then((result) => {
-      // if(result.dataToSend[result.dataToSend.length-1] != null || result.dataToSend[result.dataToSend.length-1] != undefined){
+    let url;
+    try {
+      url = tabs[0].url;
+      chrome.storage.local.get("dataToSend").then((result) => {
         if(url != null || url != undefined){
         result.dataToSend.shift()
         result.dataToSend.push(url);
+
         chrome.storage.local
         .set({ dataToSend: result.dataToSend })
         .then(() => {
@@ -202,17 +216,44 @@ chrome.tabs.onActivated.addListener(()=>{
         });
       } 
     });
+    } catch (error) {
+      console.log(error)
+    }
   })
 })
 
-chrome.tabs.onUpdated.addListener(()=>{
+chrome.tabs.onUpdated.addListener((tabID,changeInfo,tab)=>{
+  
+  if(changeInfo.status == "complete"){
+    console.log("On updated 2")
 
-  chrome.storage.local.get("dataToSend").then((result) => {
-    let referrer = result.dataToSend[result.dataToSend.length-2];
-    let current = result.dataToSend[result.dataToSend.length-1];
-    
-    console.log("referrer",referrer)
-    console.log("current",current)
-  });
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    let url;
+    try {
+      url = tabs[0].url;
+      chrome.storage.local.get("dataToSend").then((result) => {
+        let referrer = result.dataToSend[result.dataToSend.length-1];
+        let current = url
+        console.log("referrer",referrer)
+        console.log("current",current)
+
+        result.dataToSend.shift()
+        result.dataToSend.push(url);
+        chrome.storage.local
+        .set({ dataToSend: result.dataToSend })
+        .then(() => {
+          console.log(
+            "URL added to storage:",
+            result.dataToSend
+          );
+        });
+      });
+
+    } catch (error) {
+      console.log(error)
+    }
+  })
+  }
+  
 }
 )
