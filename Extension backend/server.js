@@ -5,22 +5,22 @@ const Cookie = require("./models/productModel")
 app.use(express.json())
 //Routes
 
-app.get("/",(req,res)=>{
-    res.send("Hello Node API")
-}
-)
-app.get("/Blog",(req,res)=>{
-    res.send("Hello Blog")
-})
+// app.get("/",(req,res)=>{
+//     res.send("Hello Node API")
+// }
+// )
+// app.get("/Blog",(req,res)=>{
+//     res.send("Hello Blog")
+// })
 
-app.get("/cookies",async (req,res)=>{
-    try {
-        const cookies = await Cookie.find({});
-        res.status(200).json(cookies) 
-    } catch (error) {
-        res.status(500).json({message: error.message})
-    }
-})
+// app.get("/cookies",async (req,res)=>{
+//     try {
+//         const cookies = await Cookie.find({});
+//         res.status(200).json(cookies) 
+//     } catch (error) {
+//         res.status(500).json({message: error.message})
+//     }
+// })
 
 app.post("/cookies",async (req,res)=>{
     try {

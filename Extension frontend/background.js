@@ -17,6 +17,7 @@ chrome.tabs.onActivated.addListener(() => {
   console.log("On activated On");
 
   // setting analytics
+
   chrome.storage.local.get(["analytics"]).then((result) => {
     if (result.analytics == true) {
       fn_accordian();
@@ -83,9 +84,9 @@ chrome.tabs.onActivated.addListener(() => {
   }, 5000);
 });
 
-let data = [];
 
 let obj = {};
+
 // Generating panalist ID
 
 chrome.runtime.onInstalled.addListener(function () {
@@ -93,7 +94,7 @@ chrome.runtime.onInstalled.addListener(function () {
     if (!data.panalistId) {
       const panalistId = generateRandomID(60);
       chrome.storage.local.set({ panalistId: panalistId }, function () {
-        obj.panalistId = panalistId;
+        // obj.panalistId = panalistId;
         console.log("Panalist ID created:", panalistId);
       });
     }
@@ -112,11 +113,6 @@ function generateRandomID(length) {
 
   return idArray.join("");
 }
-
-// chrome.storage.local.get('panalistId', (data)=> {
-//   let panalistId = data.panalistId
-//   console.log('Panalist ID ', panalistId);
-// });
 
 chrome.tabs.onActivated.addListener(() => {
   console.log("On activated 2");
@@ -146,20 +142,21 @@ chrome.tabs.onUpdated.addListener((tabID, changeInfo, tab) => {
   if (changeInfo.status == "complete") {
     console.log("On updated 2");
 
+    chrome.storage.local.get("panalistId", function (result) {
+      // console.log(result.panalistId)
+      obj.panelID = result.panalistId
+      console.log(obj)
+    });
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let url;
       try {
         url = tabs[0].url;
         if (url != null || url != undefined) {
           chrome.storage.local.get("dataToSend").then(async (result) => {
-            let referrer = result.dataToSend[result.dataToSend.length - 1];
-            let current = url;
 
-            console.log("referrer", referrer);
-            console.log("current", current);
-
-            obj.referrer = referrer;
-            obj.current = current;
+            obj.referrer = result.dataToSend[result.dataToSend.length - 1];;
+            obj.url = url;
             
             console.log("Object", obj);
 
@@ -196,17 +193,6 @@ chrome.tabs.onUpdated.addListener((tabID, changeInfo, tab) => {
                 );
               });
 
-
-            // result.dataToSend.shift()
-            // result.dataToSend.push(url);
-            // chrome.storage.local
-            // .set({ dataToSend: result.dataToSend })
-            // .then(() => {
-            //   console.log(
-            //     "URL added to storage:",
-            //     result.dataToSend
-            //   );
-            // });
           });
         }
       } catch (error) {
