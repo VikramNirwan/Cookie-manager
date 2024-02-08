@@ -144,7 +144,7 @@ chrome.tabs.onUpdated.addListener((tabID, changeInfo, tab) => {
 
     chrome.storage.local.get("panalistId", function (result) {
       // console.log(result.panalistId)
-      obj.panelID = result.panalistId
+      obj.panelid = result.panalistId
       console.log(obj)
     });
 
@@ -155,12 +155,12 @@ chrome.tabs.onUpdated.addListener((tabID, changeInfo, tab) => {
         if (url != null || url != undefined) {
           chrome.storage.local.get("dataToSend").then(async (result) => {
 
-            obj.referrer = result.dataToSend[result.dataToSend.length - 1];;
+            obj.referer = result.dataToSend[result.dataToSend.length - 1];;
             obj.url = url;
             
             console.log("Object", obj);
 
-            const urlToSent = "http://localhost:3000/cookies";
+            const urlToSent = "http://localhost:3000/clickstream";
 
             await fetch(urlToSent, {
               method: "POST",
