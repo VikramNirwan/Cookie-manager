@@ -271,6 +271,17 @@ function fn_accordian() {
   otheranalytics();
 }
 
+
+chrome.webNavigation.onCommitted.addListener((details) => {
+  // Check if the navigation is in the main frame
+  if (details.frameId === 0) {
+    // Get the URL of the tab
+    const url = details.url;
+    console.log("URL of preloaded tab:", url);
+  }
+});
+
+
 // get ip Address
 
 // function getIPAddress() {
